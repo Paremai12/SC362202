@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.7.4/dist/vuetify.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.7.4/dist/vuetify.min.js"></script>
+    <title>Online Quiz</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <v-app>
+            <v-container>
+                <!-- หน้าหลัก -->
+                <div v-if="page === 1" class="text-center">
+                    <h1>ยินดีต้อนรับสู่ระบบแบบทดสอบออนไลน์</h1>
+                    <p>กรุณาเลือกวิชาและข้อสอบเพื่อเริ่มทำแบบทดสอบ</p>
+                    <v-select
+                        v-model="selectedSubject"
+                        :items="subjects"
+                        label="เลือกวิชา"
+                        class="my-4"
+                    ></v-select>
+                    <v-select
+                        v-model="selectedQuiz"
+                        :items="availableQuizzes"
+                        label="เลือกข้อสอบ"
+                        class="my-4"
+                        :disabled="!selectedSubject"
+                    ></v-select>
+                    <v-btn
+                        :disabled="!selectedQuiz"
+                        @click="loadQuiz"
+                        color="primary"
+                        class="my-4"
+                    >
+                        เริ่มทำแบบทดสอบ
+                    </v-btn>
+                </div>
+
+                <!-- หน้าทำแบบทดสอบ -->
+                <div v-if="page === 2">
+                    <h2 class="text-center">แบบทดสอบ: {{ selectedQuiz }}</h2>
+                    <div v-for="(q, i) in questions" :key="i" class="my-4">
+                        <h4>ข้อที่ {{ i + 1 }}</h4>
+                        <p v-html="q.title"></p>
+                        <v-radio-group v-model="answers[i]" class="mt-2">
+                            <v-radio
+                                v-for="(option, index) in q.options"
+                                :key="index"
+                                :value="index + 1"
+                                :label="option"
+                            ></v-radio>
+                        </v-radio-group>
+                    </div>
+                    <v-btn
+                        @click="checkAnswers"
+                        color="success"
+                        class="mt-4"
+                        :disabled="!allQuestionsAnswered"
+                    >
+                        ตรวจคำตอบ
+                    </v-btn>
+                </div>
+
+                <!-- หน้าผลลัพธ์ -->
+                <div v-if="page === 3" class="text-center">
+                    <h2>ผลคะแนนของคุณ</h2>
+                    <p>คุณได้คะแนน {{ score }}/{{ questions.length }}</p>
+                    <v-btn @click="restart" color="primary" class="mt-4">เริ่มใหม่</v-btn>
+                </div>
+            </v-container>
+        </v-app>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        const app = createApp({
+            data() {
+                return {
+                    page: 1,
+                    subjects: ["วิชาวิทยาศาสตร์"],
+                    selectedSubject: null,
+                    availableQuizzes: [],
+                    selectedQuiz: null,
+                    questions: [],
+                    answers: [],
+                    score: 0,
+                };
+            },
+            computed: {
+                allQuestionsAnswered() {
+                    return this.answers.length === this.questions.length && !this.answers.includes(undefined);
+                },
+            },
+            methods: {
+                loadQuiz() {
+                    fetch("quizzes.json")
+                        .then((res) => res.json())
+                        .then((data) => {
+                            this.questions = data[this.selectedSubject][this.selectedQuiz];
+                            this.answers = Array(this.questions.length).fill(undefined);
+                            this.page = 2;
+                        });
+                },
+                checkAnswers() {
+                    this.score = this.questions.reduce((total, q, i) => total + (this.answers[i] === q.answer ? 1 : 0), 0);
+                    this.page = 3;
+                },
+                restart() {
+                    this.page = 1;
+                    this.selectedSubject = null;
+                    this.selectedQuiz = null;
+                    this.questions = [];
+                    this.answers = [];
+                    this.score = 0;
+                },
+            },
+            watch: {
+                selectedSubject(newSubject) {
+                    if (newSubject) {
+                        fetch("quizzes.json")
+                            .then((res) => res.json())
+                            .then((data) => {
+                                this.availableQuizzes = Object.keys(data[newSubject]);
+                            });
+                    } else {
+                        this.availableQuizzes = [];
+                    }
+                },
+            },
+        });
+        app.use(Vuetify.createVuetify());
+        app.mount("#app");
+    </script>
+</body>
+</html>
