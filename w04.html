@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A-Frame VR Scene</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.2/dist/aframe-extras.min.js"></script>
+
+</head>
+<body>
+  <a-scene>
+    <!-- ฉากหลังแบบ 360 -->
+    <a-sky src="pngtree.jpg" rotation="0 -90 0"></a-sky>
+
+    <!-- โมเดล 3D -->
+    <a-entity 
+      gltf-model="Fox.glb" 
+      animation-mixer="clip:*" 
+      scale="0.5 0.5 0.5" 
+      position="3 0.5 -4">
+    </a-entity>
+
+    <a-entity gltf-model="Cute Red Dino.glb" animation-mixer="" scale="0.5 0.5 0.5" position="-3 0.5 -4" rotation="0 85.61 0">
+    </a-entity>
+
+    <!-- ข้อความ -->
+    <a-entity 
+      text="value: 663380583-3; color: white; align: center; width: 4" 
+      position="0 3 -3">
+    </a-entity>
+
+    <!-- ข้อความ -->
+    <a-entity 
+      text="value: Paremai Hongsamreong; color: white; align: center; width: 4" 
+      position="0 2 -3">
+    </a-entity>
+
+    <!-- พื้น -->
+    <a-plane 
+      src="download.jpg" 
+      height="100" 
+      width="100" 
+      rotation="-90 0 0">
+    </a-plane>
+
+    <!-- กล้อง -->
+    <a-entity camera look-controls position="0 1.6 0"></a-entity>
+  </a-scene>
+</body>
+</html>
